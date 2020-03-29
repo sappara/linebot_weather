@@ -38,13 +38,22 @@ foreach ($events as $event) {
     }
     // オウム返し
     // $bot->replyText($event->getReplyToken(), $event->getText());
-    replyTextMessage($bot, $event->getReplyToken(), $event->getText());
-    // 他のfunctionを使うときは,それぞれの記述を書く事
-    // テキストを返信
-    // $bot->replyText($event->getReplyToken(), 'TextMessage');
-    // テキストを返信、その２
-    // replyTextMessage($bot, $event->getReplyToken(), 'こんにちは');
-    // その他も同様
+    // 入力されたテキストを取得
+    $location = $event->getText();
+    
+    // 住所ID用変数
+    $locationId;
+    // XMLファイルをパースするクラス
+    $client = new Goutte\Client();
+    // XMLファイルを取得
+    $crawler = $client->request('GET', 'http://weather.livedoor.com/forecast/rss/primary_area.xml');
+    // 市名のみを抽出しユーザーが入力した市名と比較
+    foreach ($crawler->filter('channel ldWeather|source pref city') as $city) {
+      // 一致すれば住所IDを取得し処理を抜ける
+      if($city->getAttribute('title') == $location || $city->getAttribute('title') . "市" == $location) {
+        $locationId = $city->getAttribute('id');
+        break;
+      }
   }
 
 // テキストを返信。引数はLINEBot、返信先、テキスト
