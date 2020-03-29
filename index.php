@@ -40,7 +40,7 @@ foreach ($events as $event) {
     // $bot->replyText($event->getReplyToken(), $event->getText());
     // 入力されたテキストを取得
     $location = $event->getText();
-    
+
     // 住所ID用変数
     $locationId;
     // XMLファイルをパースするクラス
@@ -53,6 +53,28 @@ foreach ($events as $event) {
       if($city->getAttribute('title') == $location || $city->getAttribute('title') . "市" == $location) {
         $locationId = $city->getAttribute('id');
         break;
+      }
+    }
+    // 一致するものが無ければ
+    if(empty($locationId)) {
+      // 位置情報が送られた時は県名を取得済みなのでそれを代入
+      if ($event instanceof \LINE\LINEBot\Event\MessageEvent\LocationMessage) {
+        $location = $prefName;
+      }
+      // 候補の配列
+      $suggestArray = array();
+      // 県名を抽出しユーザーが入力した県名と比較
+      foreach ($crawler->filter('channel ldWeather|source pref') as $pref) {
+        // 一致すれば
+        if(strpos($pref->getAttribute('title'), $location) !== false) {
+          // その県に属する市を配列に追加
+          foreach($pref->childNodes as $child) {
+            if($child instanceof DOMElement && $child->nodeName == 'city') {
+              array_push($suggestArray, $child->getAttribute('title'));
+            }
+          }
+          break;
+        }
       }
   }
 
