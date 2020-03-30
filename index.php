@@ -150,8 +150,31 @@ foreach ($events as $event) {
   $date = date_parse_from_format('Y-m-d\TH:i:sP', $json['description']['publicTime']);
 
   // 天気情報と更新時刻をまとめて返信
-  replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
-  '最終更新：' . sprintf('%s月%s日%s時%s分', $date['month'], $date['day'], $date['hour'], $date['minute']));
+  // replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+  // '最終更新：' . sprintf('%s月%s日%s時%s分', $date['month'], $date['day'], $date['hour'], $date['minute']));
+
+  // 予報が晴れの場合
+  if($json['forecasts'][0]['telop'] == '晴れ') {
+    // 天気情報、更新時刻、晴れのスタンプをまとめて送信
+    replyMultiMessage($bot, $event->getReplyToken(),
+      new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($json['description']['text'] . PHP_EOL . PHP_EOL .
+        '最終更新：' . sprintf('%s月%s日%s時%s分', $date['month'], $date['day'], $date['hour'], $date['minute'])),
+      new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 513)
+    );
+  // 雨の場合
+  } else if($json['forecasts'][0]['telop'] == '雨') {
+    replyMultiMessage($bot, $event->getReplyToken(),
+      // 天気情報、更新時刻、雨のスタンプをまとめて送信
+      new \LINE\LINEBot\MessageBuilder\TextMessageBuilder($json['description']['text'] . PHP_EOL . PHP_EOL .
+        '最終更新：' . sprintf('%s月%s日%s時%s分', $date['month'], $date['day'], $date['hour'], $date['minute'])),
+      new \LINE\LINEBot\MessageBuilder\StickerMessageBuilder(2, 507)
+    );
+  // 他
+  } else {
+    // 天気情報と更新時刻をまとめて返信
+    replyTextMessage($bot, $event->getReplyToken(), $json['description']['text'] . PHP_EOL . PHP_EOL .
+      '最終更新：' . sprintf('%s月%s日%s時%s分', $date['month'], $date['day'], $date['hour'], $date['minute']));
+  }
 }
 
 // テキストを返信。引数はLINEBot、返信先、テキスト
