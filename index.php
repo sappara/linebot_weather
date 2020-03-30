@@ -27,7 +27,7 @@ try {
 // 配列に格納された各イベントをループで処理
 foreach ($events as $event) {
   // push通信のためのユーザーID確認
-  error_log($event->getUserId());
+  // error_log($event->getUserId());
   // MessageEventクラスのインスタンスでなければ処理をスキップ
   if (!($event instanceof \LINE\LINEBot\Event\MessageEvent)) {
     error_log('Non message event has come');
